@@ -8,6 +8,6 @@
     "binding": "ASSETS"
   },
   "kv_namespaces": [
-    { "binding": "LEADERBOARD", "id": "REPLACE_WITH_YOUR_KV_NAMESPACE_ID" }
+    { "binding": "LEADERBOARD", "id": "bc4f1ffa957d435b83728444ff74651c" }
   ]
 }
