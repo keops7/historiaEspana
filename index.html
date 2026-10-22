@@ -229,6 +229,7 @@
   }
 
   /* ===================== ACTION / POWER / FORT GEMS ===================== */
+  .btn-key{ display:block; font-size:.6em; font-weight:700; opacity:.78; letter-spacing:.01em; margin-top:.05em; }
   .action-btn{
     position:absolute;
     right:max(1.6rem, calc(env(safe-area-inset-right) + .8rem));
@@ -469,22 +470,13 @@
     font-family:"Cinzel",serif; font-weight:800; font-size:.7rem;
     color:#ffe08d; margin-bottom:.06rem; letter-spacing:.02em;
   }
-  .stat-hud span{ position:relative; z-index:1; }
-  .stat-hud span::before{ margin-right:.28rem; }
+  .stat-hud[hidden]{ display:none; }
+  .perk-rows{ position:relative; z-index:1; display:flex; flex-direction:column; gap:.14rem; }
   .stat-hud b{
     font-variant-numeric:tabular-nums; font-weight:800;
     color:#ffe08d;
     text-shadow:0 1px 0 rgba(0,0,0,.6), 0 0 10px rgba(255,196,70,.45);
   }
-  #hero-hud span:nth-of-type(1)::before{ content:"💥"; }
-  #hero-hud span:nth-of-type(2)::before{ content:"⚡"; }
-  #hero-hud span:nth-of-type(3)::before{ content:"🥾"; }
-  #hero-hud span:nth-of-type(4)::before{ content:"☠️"; }
-  #hero-hud span:nth-of-type(5)::before{ content:"🔥"; }
-  #hero-hud span:nth-of-type(6)::before{ content:"🐴"; }
-  #fort-hud span:nth-of-type(1)::before{ content:"💥"; }
-  #fort-hud span:nth-of-type(2)::before{ content:"⚡"; }
-  #fort-hud span:nth-of-type(3)::before{ content:"☠️"; }
 
   /* ===================== FLOATING LABELS ===================== */
   .float{
@@ -567,6 +559,11 @@
     color:#1c3a72; margin-bottom:.15rem;
   }
   .perk-opt span{ font-size:.77rem; color:var(--ink-soft); font-weight:600; }
+  .perk-opt-key{
+    position:absolute; top:.55rem; right:.7rem;
+    font-size:.68rem !important; color:var(--gold-deep) !important; font-weight:800 !important;
+    font-family:"Baloo 2","Nunito",sans-serif; letter-spacing:.02em;
+  }
 
   .intro-modal{
     position:absolute; inset:0; z-index:90;
@@ -633,9 +630,9 @@
     <button class="zoom-btn" id="zoom-in-btn" type="button" aria-label="Acercar">+</button>
     <button class="zoom-btn" id="zoom-out-btn" type="button" aria-label="Alejar">−</button>
   </div>
-  <button class="fort-btn" id="fort-btn" type="button">Atalaya</button>
+  <button class="fort-btn" id="fort-btn" type="button">Atalaya<span class="btn-key">[alt]</span></button>
   <button class="power-btn" id="power-btn" type="button">Poder</button>
-  <button class="action-btn" id="action-btn" type="button">Acción</button>
+  <button class="action-btn" id="action-btn" type="button">Acción<span class="btn-key">[espacio]</span></button>
   <button class="free-atalaya-btn" id="free-atalaya-btn" type="button">🚩 Anclar atalaya aquí</button>
   <div class="hint" id="hint"></div>
   <div class="hud-stack">
@@ -644,20 +641,13 @@
       <span>Oleada: <b id="hud-wave">0</b></span>
       <span id="hud-next-row">Próxima: <b id="hud-next">0</b>s</span>
     </div>
-    <div class="stat-hud" id="hero-hud">
+    <div class="stat-hud" id="hero-hud" hidden>
       <div class="stat-hud-title">⚔️ Enrique</div>
-      <span>Daño: <b id="hud-hero-dmg">0</b></span>
-      <span>Vel. ataque: <b id="hud-hero-atkspd">1.00</b></span>
-      <span>Vel. movimiento: <b id="hud-hero-movespd">×1.00</b></span>
-      <span>Crítico: <b id="hud-hero-crit">0%</b></span>
-      <span>Daño crítico: <b id="hud-hero-critdmg">×3.00</b></span>
-      <span>Aliados: <b id="hud-hero-allies">0</b></span>
+      <div class="perk-rows" id="hero-perk-rows"></div>
     </div>
-    <div class="stat-hud" id="fort-hud">
+    <div class="stat-hud" id="fort-hud" hidden>
       <div class="stat-hud-title">🏹 Atalayas</div>
-      <span>Daño: <b id="hud-fort-dmg">0</b></span>
-      <span>Vel. ataque: <b id="hud-fort-atkspd">1.00</b></span>
-      <span>Crítico: <b id="hud-fort-crit">0%</b></span>
+      <div class="perk-rows" id="fort-perk-rows"></div>
     </div>
   </div>
   <div class="rotate-hint" id="rotate-hint">
@@ -736,14 +726,14 @@ import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.m
   var MAX_LIVE_ENEMIES = 140;
 
   var ATALAYA_DEFS = [
-    { id:"fort_front", x:0, z:0.3, label:"Atalaya frontal", legacyGate:"front" },
-    { id:"fort_front_outer", x:0, z:-1.6, label:"Atalaya avanzada" },
-    { id:"fort_left", x:-6.6, z:7.4, label:"Atalaya izquierda", legacyGate:"left" },
-    { id:"fort_left_outer", x:-8.3, z:7.4, label:"Atalaya lejana izquierda" },
-    { id:"fort_right", x:6.6, z:7.4, label:"Atalaya derecha", legacyGate:"right" },
-    { id:"fort_right_outer", x:8.3, z:7.4, label:"Atalaya lejana derecha" },
-    { id:"fort_back", x:0, z:13.7, label:"Atalaya trasera", legacyGate:"back" },
-    { id:"fort_back_outer", x:0, z:15.6, label:"Atalaya trasera avanzada" },
+    { id:"fort_front", x:1.7, z:0.3, label:"Atalaya frontal", legacyGate:"front" },
+    { id:"fort_front_outer", x:1.7, z:-1.6, label:"Atalaya avanzada" },
+    { id:"fort_left", x:-6.6, z:9.4, label:"Atalaya izquierda", legacyGate:"left" },
+    { id:"fort_left_outer", x:-8.3, z:9.4, label:"Atalaya lejana izquierda" },
+    { id:"fort_right", x:6.6, z:9.4, label:"Atalaya derecha", legacyGate:"right" },
+    { id:"fort_right_outer", x:8.3, z:9.4, label:"Atalaya lejana derecha" },
+    { id:"fort_back", x:-1.7, z:13.7, label:"Atalaya trasera", legacyGate:"back" },
+    { id:"fort_back_outer", x:-1.7, z:15.6, label:"Atalaya trasera avanzada" },
     { id:"fort_left_wall", x:-4.3, z:5.3, label:"Atalaya del muro izquierdo" },
     { id:"fort_right_wall", x:4.3, z:5.3, label:"Atalaya del muro derecho" },
     { id:"fort_front_left_wall", x:-2.3, z:3.0, label:"Atalaya junto a la puerta (izq.)" },
@@ -772,15 +762,10 @@ import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.m
   var hudWave = document.getElementById("hud-wave");
   var hudNext = document.getElementById("hud-next");
   var hudNextRow = document.getElementById("hud-next-row");
-  var hudHeroDmg = document.getElementById("hud-hero-dmg");
-  var hudHeroAtkSpd = document.getElementById("hud-hero-atkspd");
-  var hudHeroMoveSpd = document.getElementById("hud-hero-movespd");
-  var hudHeroCrit = document.getElementById("hud-hero-crit");
-  var hudHeroCritDmg = document.getElementById("hud-hero-critdmg");
-  var hudHeroAllies = document.getElementById("hud-hero-allies");
-  var hudFortDmg = document.getElementById("hud-fort-dmg");
-  var hudFortAtkSpd = document.getElementById("hud-fort-atkspd");
-  var hudFortCrit = document.getElementById("hud-fort-crit");
+  var heroHud = document.getElementById("hero-hud");
+  var fortHud = document.getElementById("fort-hud");
+  var heroPerkRows = document.getElementById("hero-perk-rows");
+  var fortPerkRows = document.getElementById("fort-perk-rows");
   var resetBtn = document.getElementById("reset-btn");
   var resetConfirmModal = document.getElementById("reset-confirm-modal");
   var resetConfirmBtn = document.getElementById("reset-confirm-btn");
@@ -978,6 +963,7 @@ import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.m
   }
   var currentZone = null;
   var perkModalOpen = false;
+  var perkModalPicks = [];
   var PERKS = [
     { id:"fireRate", target:"player", name:"Cadencia de tiro", icon:"⚡", desc:function(lvl){ return "Disparas un 22% más rápido (Nv "+(lvl+1)+")"; } },
     { id:"damage", target:"player", name:"Fuerza de tiro", icon:"💥", desc:function(lvl){ return "Tus flechas hacen un 25% más de daño (Nv "+(lvl+1)+")"; } },
@@ -1010,6 +996,20 @@ import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.m
     });
   }
 
+  function renderPerkPanels(){
+    var heroRows = PERKS.filter(function(p){ return perkLevel(p)>0; });
+    var fortRows = FORT_PERKS.filter(function(p){ return perkLevel(p)>0; });
+    heroPerkRows.innerHTML = heroRows.map(function(p){
+      var lvl = perkLevel(p);
+      return "<span>"+p.icon+" "+p.name+(p.maxLevel===1 ? "" : " · Nv "+lvl)+"</span>";
+    }).join("");
+    fortPerkRows.innerHTML = fortRows.map(function(p){
+      return "<span>"+p.icon+" "+p.name+" · Nv "+perkLevel(p)+"</span>";
+    }).join("");
+    heroHud.hidden = heroRows.length===0;
+    fortHud.hidden = fortRows.length===0;
+  }
+
   function grantRandomPerk(){
     var pool = availablePerks().filter(function(p){ return p.randomEligible!==false; });
     if(!pool.length) return;
@@ -1017,6 +1017,7 @@ import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.m
     var bucket = p.target==="fort" ? WAR.fortPerks : WAR.perks;
     bucket[p.id] = (bucket[p.id]||0) + 1;
     syncAllies();
+    renderPerkPanels();
     floatLabel("🎁 ¡Ventaja gratuita! "+p.icon+" "+p.name, 2600);
   }
 
@@ -1032,13 +1033,14 @@ import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.m
       var idx = Math.floor(Math.random()*pool.length);
       picks.push(pool.splice(idx,1)[0]);
     }
+    perkModalPicks = picks;
     perkOptions.innerHTML = "";
-    picks.forEach(function(p){
+    picks.forEach(function(p, i){
       var btn = document.createElement("button");
       btn.type = "button";
       btn.className = "perk-opt";
       var lvl = perkLevel(p);
-      btn.innerHTML = "<b>"+p.icon+" "+p.name+"</b><span>"+p.desc(lvl)+"</span>";
+      btn.innerHTML = "<b>"+p.icon+" "+p.name+"</b><span>"+p.desc(lvl)+"</span><span class=\"perk-opt-key\">["+(i+1)+"]</span>";
       btn.addEventListener("click", function(){ choosePerk(p); });
       perkOptions.appendChild(btn);
     });
@@ -1049,8 +1051,10 @@ import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.m
     var bucket = p.target==="fort" ? WAR.fortPerks : WAR.perks;
     bucket[p.id] = (bucket[p.id]||0) + 1;
     syncAllies();
+    renderPerkPanels();
     perkModal.hidden = true;
     perkModalOpen = false;
+    perkModalPicks = [];
     clickPower();
     floatLabel("¡Ventaja adquirida: "+p.name+"!");
     spawnWave();
@@ -1058,7 +1062,6 @@ import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.m
   }
   var lastHintText = "";
   var lastHudText = "";
-  var lastStatHudText = "";
   var lastPowerLabel = "";
 
 
@@ -4414,30 +4417,6 @@ import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.m
       }
     }
 
-    var hp2 = WAR.perks;
-    var heroDmgMult = 1 + hp2.damage*0.25;
-    var heroDmgPerHit = 10*heroDmgMult;
-    var heroFireRateMult = 1 + hp2.fireRate*0.22;
-    var heroAtkSpd = (1 + playerPower.level*PLAYER_POWER_STEP) * heroFireRateMult;
-    var heroCritPct = hp2.critChance*0.08*100;
-    var heroAllyCount = getAllAllies().length;
-    var fp2 = WAR.fortPerks;
-    var fortDmgVal = 12*(1 + fp2.damage*0.11);
-    var fortAtkSpd = 1 + fp2.rate*0.09;
-    var fortCritPct = fp2.critChance*0.04*100;
-    var statTxt = heroDmgPerHit.toFixed(0)+"|"+heroAtkSpd.toFixed(2)+"|"+speedMult.toFixed(2)+"|"+heroCritPct.toFixed(0)+"|"+heroAllyCount+"|"+fortDmgVal.toFixed(0)+"|"+fortAtkSpd.toFixed(2)+"|"+fortCritPct.toFixed(0);
-    if(statTxt !== lastStatHudText){
-      lastStatHudText = statTxt;
-      hudHeroDmg.textContent = heroDmgPerHit.toFixed(0);
-      hudHeroAtkSpd.textContent = heroAtkSpd.toFixed(2);
-      hudHeroMoveSpd.textContent = "×"+speedMult.toFixed(2);
-      hudHeroCrit.textContent = heroCritPct.toFixed(0)+"%";
-      hudHeroCritDmg.textContent = "×3.00";
-      hudHeroAllies.textContent = heroAllyCount;
-      hudFortDmg.textContent = fortDmgVal.toFixed(0);
-      hudFortAtkSpd.textContent = fortAtkSpd.toFixed(2);
-      hudFortCrit.textContent = fortCritPct.toFixed(0)+"%";
-    }
 
     renderFrame();
   }
@@ -4539,6 +4518,11 @@ import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.m
       if(e.key===" "){ e.preventDefault(); actionBtn.click(); }
       if(e.key==="Control"){ e.preventDefault(); powerBtn.click(); }
       if(e.key==="Alt"){ e.preventDefault(); fortBtn.click(); }
+      if(perkModalOpen && (e.key==="1"||e.key==="2"||e.key==="3")){
+        e.preventDefault();
+        var pick = perkModalPicks[parseInt(e.key,10)-1];
+        if(pick) choosePerk(pick);
+      }
     });
     window.addEventListener("keyup", function(e){
       if(e.key==="ArrowUp"||e.key==="w") setKey("up",false);
@@ -4679,6 +4663,7 @@ import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.m
     try{
       initScene();
       loadingEl.remove();
+      renderPerkPanels();
       renderFrame();
       if(introModal){
         introModal.hidden = false;
