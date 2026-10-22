@@ -566,6 +566,30 @@
     font-family:"Baloo 2","Nunito",sans-serif; letter-spacing:.02em;
   }
 
+  .score-submit{ display:flex; gap:.5rem; margin-top:.7rem; }
+  .name-input{
+    flex:1 1 auto; min-width:0; padding:.55rem .75rem; border-radius:10px;
+    border:2px solid var(--card-line); background:#fff8e2;
+    font-family:"Nunito",sans-serif; font-weight:700; font-size:.85rem; color:#1c3a72;
+  }
+  .name-input:focus{ outline:none; border-color:var(--gold-mid); }
+  .score-submit .intro-start-btn{ flex:0 0 auto; width:auto; padding-left:1rem; padding-right:1rem; font-size:.8rem; }
+  .score-status{ font-size:.78rem; font-weight:700; color:var(--ink-soft); margin-top:.4rem; min-height:1em; }
+  .leaderboard-list{
+    margin-top:.6rem; max-height:220px; overflow-y:auto;
+    border-radius:10px; border:2px solid var(--card-line); background:rgba(255,255,255,.5);
+  }
+  .leaderboard-list:empty{ display:none; }
+  .lb-row{
+    display:flex; align-items:center; gap:.5rem; padding:.4rem .7rem;
+    font-family:"Nunito",sans-serif; font-size:.8rem; font-weight:700; color:#1c3a72;
+    border-bottom:1px solid rgba(0,0,0,.08);
+  }
+  .lb-row:last-child{ border-bottom:none; }
+  .lb-rank{ flex:0 0 1.6em; color:var(--gold-deep); font-weight:800; }
+  .lb-name{ flex:1 1 auto; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .lb-meta{ flex:0 0 auto; font-size:.74rem; color:var(--ink-soft); font-weight:600; }
+
   .intro-modal{
     position:absolute; inset:0; z-index:90;
     background:radial-gradient(120% 90% at 50% 35%, rgba(20,40,80,.7), rgba(3,7,16,.9));
@@ -617,6 +641,7 @@
     <div class="sub">Defiende la fortaleza</div>
   </div>
   <div style="display:flex; gap:.5rem;">
+    <button class="reset-link" id="leaderboard-btn" type="button">🏆 Tabla de tiempos</button>
     <button class="reset-link" id="mute-btn" type="button">🔊</button>
     <button class="reset-link" id="reset-btn" type="button">Reiniciar asedio</button>
   </div>
@@ -688,6 +713,12 @@
       <div class="intro-sub">¡Victoria!</div>
       <h2>Ceuta ha resistido</h2>
       <p id="victory-summary"></p>
+      <div class="score-submit" id="victory-score-submit">
+        <input type="text" id="victory-name-input" class="name-input" maxlength="20" placeholder="Tu nombre">
+        <button class="intro-start-btn" id="victory-submit-btn" type="button">🏆 Guardar marca</button>
+      </div>
+      <div class="score-status" id="victory-score-status"></div>
+      <div class="leaderboard-list" id="victory-leaderboard-list"></div>
       <button class="intro-start-btn" id="victory-continue-btn" type="button">⚔️ Seguir jugando</button>
       <button class="reset-link" id="victory-newgame-btn" type="button" style="margin-top:.6rem; width:100%;">Nueva partida</button>
     </div>
@@ -697,7 +728,21 @@
       <div class="intro-sub">Derrota</div>
       <h2>La fortaleza ha caído</h2>
       <p id="defeat-summary"></p>
+      <div class="score-submit" id="defeat-score-submit">
+        <input type="text" id="defeat-name-input" class="name-input" maxlength="20" placeholder="Tu nombre">
+        <button class="intro-start-btn" id="defeat-submit-btn" type="button">🏆 Guardar marca</button>
+      </div>
+      <div class="score-status" id="defeat-score-status"></div>
+      <div class="leaderboard-list" id="defeat-leaderboard-list"></div>
       <button class="intro-start-btn" id="defeat-newgame-btn" type="button">🗡️ Nueva partida</button>
+    </div>
+  </div>
+  <div class="perk-modal" id="leaderboard-modal" hidden>
+    <div class="intro-card">
+      <div class="intro-sub">Mejores marcas</div>
+      <h2>🏆 Tabla de tiempos</h2>
+      <div class="leaderboard-list" id="leaderboard-modal-list"></div>
+      <button class="reset-link" id="leaderboard-close-btn" type="button" style="margin-top:.6rem; width:100%;">Cerrar</button>
     </div>
   </div>
 </div>
@@ -798,6 +843,18 @@ import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.m
   var defeatModal = document.getElementById("defeat-modal");
   var defeatSummary = document.getElementById("defeat-summary");
   var defeatNewGameBtn = document.getElementById("defeat-newgame-btn");
+  var victoryNameInput = document.getElementById("victory-name-input");
+  var victorySubmitBtn = document.getElementById("victory-submit-btn");
+  var victoryScoreStatus = document.getElementById("victory-score-status");
+  var victoryLeaderboardList = document.getElementById("victory-leaderboard-list");
+  var defeatNameInput = document.getElementById("defeat-name-input");
+  var defeatSubmitBtn = document.getElementById("defeat-submit-btn");
+  var defeatScoreStatus = document.getElementById("defeat-score-status");
+  var defeatLeaderboardList = document.getElementById("defeat-leaderboard-list");
+  var leaderboardBtn = document.getElementById("leaderboard-btn");
+  var leaderboardModal = document.getElementById("leaderboard-modal");
+  var leaderboardModalList = document.getElementById("leaderboard-modal-list");
+  var leaderboardCloseBtn = document.getElementById("leaderboard-close-btn");
   var muteBtn = document.getElementById("mute-btn");
   var perkModal = document.getElementById("perk-modal");
   var perkOptions = document.getElementById("perk-options");
@@ -1114,6 +1171,55 @@ import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.m
     var s = totalSec%60;
     var mm = String(m).padStart(2,"0"), ss = String(s).padStart(2,"0");
     return h>0 ? (h+":"+mm+":"+ss) : (mm+":"+ss);
+  }
+
+  var LEADERBOARD_API = "/api/leaderboard";
+  function renderLeaderboardRows(container, entries){
+    if(!entries || !entries.length){
+      container.innerHTML = '<div class="lb-row">Aún no hay marcas guardadas.</div>';
+      return;
+    }
+    container.innerHTML = entries.map(function(e, i){
+      var outcome = e.won ? "🏆 Oleada "+e.wave : "💀 Oleada "+e.wave;
+      return '<div class="lb-row"><span class="lb-rank">'+(i+1)+'.</span>'
+        +'<span class="lb-name">'+escapeHtml(e.name)+'</span>'
+        +'<span class="lb-meta">'+formatPlayTime(e.timeMs)+' · '+outcome+'</span></div>';
+    }).join("");
+  }
+  function escapeHtml(s){
+    return String(s).replace(/[&<>"']/g, function(c){
+      return ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"})[c];
+    });
+  }
+  function loadLeaderboardInto(container, statusEl){
+    container.innerHTML = '<div class="lb-row">Cargando…</div>';
+    fetch(LEADERBOARD_API).then(function(r){
+      if(!r.ok) throw new Error("http "+r.status);
+      return r.json();
+    }).then(function(entries){
+      renderLeaderboardRows(container, entries);
+    }).catch(function(){
+      container.innerHTML = '<div class="lb-row">Tabla de tiempos no disponible aquí.</div>';
+      if(statusEl) statusEl.textContent = "";
+    });
+  }
+  function submitScore(nameInput, statusEl, listEl, won){
+    var name = (nameInput.value||"").trim();
+    if(!name){ statusEl.textContent = "Escribe tu nombre primero."; return; }
+    statusEl.textContent = "Guardando…";
+    fetch(LEADERBOARD_API, {
+      method:"POST",
+      headers:{ "content-type":"application/json" },
+      body: JSON.stringify({ name:name, timeMs:WAR.playTimeMs, wave:WAR.wave, won:!!won })
+    }).then(function(r){
+      if(!r.ok) throw new Error("http "+r.status);
+      return r.json();
+    }).then(function(entries){
+      statusEl.textContent = "¡Marca guardada!";
+      renderLeaderboardRows(listEl, entries);
+    }).catch(function(){
+      statusEl.textContent = "No se pudo guardar (sin conexión con el marcador).";
+    });
   }
   var lastPowerLabel = "";
 
@@ -2900,6 +3006,8 @@ import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.m
     try{ localStorage.setItem(SAVE_KEY, JSON.stringify(WAR)); }catch(e){}
     victorySummary.textContent = "Resististe hasta la oleada "+WAR.wave+" en "+formatPlayTime(WAR.playTimeMs)+", con "+Math.floor(WAR.gold)+" de oro y "+acquiredPerkCount()+" mejoras conseguidas.";
     victoryModal.hidden = false;
+    victoryScoreStatus.textContent = "";
+    loadLeaderboardInto(victoryLeaderboardList, victoryScoreStatus);
   }
   function triggerDefeat(){
     WAR.defeat = true;
@@ -2907,6 +3015,8 @@ import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.m
     try{ localStorage.setItem(SAVE_KEY, JSON.stringify(WAR)); }catch(e){}
     defeatSummary.textContent = "Caíste en la oleada "+WAR.wave+" tras "+formatPlayTime(WAR.playTimeMs)+", con "+Math.floor(WAR.gold)+" de oro y "+acquiredPerkCount()+" mejoras conseguidas.";
     defeatModal.hidden = false;
+    defeatScoreStatus.textContent = "";
+    loadLeaderboardInto(defeatLeaderboardList, defeatScoreStatus);
   }
   function killEnemy(target){
     var reward = target.boss ? goldPerKill()*8 : goldPerKill();
@@ -4800,6 +4910,20 @@ import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.m
       location.reload();
     });
 
+    victorySubmitBtn.addEventListener("click", function(){
+      submitScore(victoryNameInput, victoryScoreStatus, victoryLeaderboardList, true);
+    });
+    defeatSubmitBtn.addEventListener("click", function(){
+      submitScore(defeatNameInput, defeatScoreStatus, defeatLeaderboardList, false);
+    });
+    leaderboardBtn.addEventListener("click", function(){
+      leaderboardModal.hidden = false;
+      loadLeaderboardInto(leaderboardModalList, null);
+    });
+    leaderboardCloseBtn.addEventListener("click", function(){
+      leaderboardModal.hidden = true;
+    });
+
     if(muteBtn){
       muteBtn.addEventListener("click", function(){
         musicOn = !musicOn;
@@ -4821,6 +4945,7 @@ import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.m
         defeatSummary.textContent = "Caíste en la oleada "+WAR.wave+" tras "+formatPlayTime(WAR.playTimeMs)+", con "+Math.floor(WAR.gold)+" de oro y "+acquiredPerkCount()+" mejoras conseguidas.";
         defeatModal.hidden = false;
         gameOverOpen = true;
+        loadLeaderboardInto(defeatLeaderboardList, defeatScoreStatus);
       }
       renderFrame();
       if(introModal){

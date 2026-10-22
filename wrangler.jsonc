@@ -1,8 +1,13 @@
 {
   "name": "historiaespana",
   "compatibility_date": "2024-09-23",
+  "main": "worker.js",
   "assets": {
     "directory": "./",
-    "not_found_handling": "404-page"
-  }
+    "not_found_handling": "404-page",
+    "binding": "ASSETS"
+  },
+  "kv_namespaces": [
+    { "binding": "LEADERBOARD", "id": "REPLACE_WITH_YOUR_KV_NAMESPACE_ID" }
+  ]
 }
