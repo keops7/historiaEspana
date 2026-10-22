@@ -631,7 +631,7 @@
     <button class="zoom-btn" id="zoom-out-btn" type="button" aria-label="Alejar">−</button>
   </div>
   <button class="fort-btn" id="fort-btn" type="button">Atalaya<span class="btn-key">[alt]</span></button>
-  <button class="power-btn" id="power-btn" type="button">Poder</button>
+  <button class="power-btn" id="power-btn" type="button"><span id="power-btn-label">Poder</span><span class="btn-key">[shift]</span></button>
   <button class="action-btn" id="action-btn" type="button">Acción<span class="btn-key">[espacio]</span></button>
   <button class="free-atalaya-btn" id="free-atalaya-btn" type="button">🚩 Anclar atalaya aquí</button>
   <div class="hint" id="hint"></div>
@@ -750,6 +750,7 @@ import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.m
   var joyKnob = document.getElementById("joystick-knob");
   var actionBtn = document.getElementById("action-btn");
   var powerBtn = document.getElementById("power-btn");
+  var powerBtnLabel = document.getElementById("power-btn-label");
   var fortBtn = document.getElementById("fort-btn");
   var freeAtalayaBtn = document.getElementById("free-atalaya-btn");
   var rotateHint = document.getElementById("rotate-hint");
@@ -4394,7 +4395,7 @@ import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.m
     var powerLabel = playerPower.level>0 ? ("Nv "+playerPower.level+(playerPower.cooldown>0 ? " · "+Math.ceil(playerPower.cooldown)+"s" : " ↑")) : (playerPower.cooldown>0 ? Math.ceil(playerPower.cooldown)+"s" : "Poder");
     if(powerLabel !== lastPowerLabel){
       lastPowerLabel = powerLabel;
-      powerBtn.textContent = powerLabel;
+      powerBtnLabel.textContent = powerLabel;
     }
     powerBtn.classList.toggle("active", playerPower.level>0 && playerPower.cooldown<=0);
     powerBtn.disabled = playerPower.cooldown>0;
@@ -4516,7 +4517,7 @@ import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.m
       if(e.key==="ArrowLeft"||e.key==="a") setKey("left",true);
       if(e.key==="ArrowRight"||e.key==="d") setKey("right",true);
       if(e.key===" "){ e.preventDefault(); actionBtn.click(); }
-      if(e.key==="Control"){ e.preventDefault(); powerBtn.click(); }
+      if(e.key==="Shift"){ e.preventDefault(); powerBtn.click(); }
       if(e.key==="Alt"){ e.preventDefault(); fortBtn.click(); }
       if(perkModalOpen && (e.key==="1"||e.key==="2"||e.key==="3")){
         e.preventDefault();
