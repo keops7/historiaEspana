@@ -889,7 +889,7 @@ import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.m
   function gateMaxHp(gateId){ return GATE_MAX_HP_BASE + totalAtalayaLevel()*10; }
   function goldPerKill(){ return 4 + Math.floor(WAR.wave*0.75); }
   function waveEnemyCount(wave){
-    var base = Math.min(12, 5+wave);
+    var base = Math.min(12, 2+Math.floor(wave*0.8));
     var lateRamp = Math.max(0, wave-20);
     return Math.min(26, base+lateRamp);
   }
@@ -2148,7 +2148,7 @@ import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.m
       { parts: bushKit().parts(),      placements: [] }
     ];
     var rand = mkRand(20240914);
-    var count = 150, placed = 0, attempts = 0;
+    var count = 115, placed = 0, attempts = 0;
     while(placed<count && attempts<count*16){
       attempts++;
       var spread = rand();
@@ -3962,12 +3962,12 @@ import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.m
     sunLight.castShadow = true;
     sunLight.shadow.mapSize.width = LOW_END ? 1024 : 2048;
     sunLight.shadow.mapSize.height = LOW_END ? 1024 : 2048;
-    sunLight.shadow.camera.left = -14;
-    sunLight.shadow.camera.right = 14;
-    sunLight.shadow.camera.top = 14;
-    sunLight.shadow.camera.bottom = -11;
+    sunLight.shadow.camera.left = -22;
+    sunLight.shadow.camera.right = 22;
+    sunLight.shadow.camera.top = 21;
+    sunLight.shadow.camera.bottom = -17;
     sunLight.shadow.camera.near = 1;
-    sunLight.shadow.camera.far = 62;
+    sunLight.shadow.camera.far = 80;
     sunLight.shadow.bias = -0.0004;
     sunLight.shadow.normalBias = 0.022;
     scene.add(sunLight);
