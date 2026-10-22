@@ -975,7 +975,7 @@ import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.m
     { id:"critChance", target:"player", name:"Golpe crítico", icon:"☠️", desc:function(lvl){ return "Un 8% de probabilidad extra de crítico, x3 de daño (Nv "+(lvl+1)+")"; } },
     { id:"soldierAlly", target:"player", name:"Refuerzo de infantería", icon:"🛡️", maxLevel:3, desc:function(lvl){ return "Se une un soldado más a tu lado, con tus mismas mejoras (seréis "+(lvl+2)+")"; } },
     { id:"petBird", target:"player", name:"Cookie, el pájaro fiel", icon:"🐦", maxLevel:1, desc:function(){ return "Cookie se une a tu lado y lucha con tus mismas mejoras"; } },
-    { id:"petDog", target:"player", name:"Hachiko, el perro fiel", icon:"🐕", maxLevel:1, desc:function(){ return "Hachiko se une a tu lado y lucha con tus mismas mejoras"; } },
+    { id:"petDog", target:"player", name:"Cerdito Valiente", icon:"🐖", maxLevel:1, desc:function(){ return "Cerdito Valiente se une a tu lado y lucha con tus mismas mejoras"; } },
     { id:"petHorse", target:"player", name:"Montura de Enrique el Navegante", icon:"🐎", maxLevel:1, minWave:25, desc:function(){ return "Un corcel se une a tu lado y lucha con tus mismas mejoras, además de darte mucha más velocidad de movimiento"; } },
     { id:"freeAtalaya", target:"player", name:"Atalaya libre", icon:"🚩", randomEligible:false, rare:true, desc:function(lvl){ return "Puedes anclar una atalaya en cualquier punto del mapa, esté o no señalado (cargas: "+(lvl+1)+")"; } }
   ];
@@ -3214,36 +3214,38 @@ import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.m
     return prefab("bird", birdKit, { castKeys:["gloss"] });
   }
 
-  function dogKit(){
+  function pigKit(){
     var k = new Kit();
-    var fur = 0xf4ebd8, furDark = 0xc9a877, nose = 0x2a2320;
-    k.add("gloss", GSph(0.20,14,11), fur, { y:0.245, sx:0.78, sy:0.80, sz:1.25 });
-    k.add("gloss", GSph(0.145,12,9), fur, { y:0.255, z:0.145, sx:0.92, sy:0.94 });
-    k.add("gloss", GSph(0.135,11,8), furDark, { y:0.30, z:-0.09, sx:0.86, sy:0.72, sz:1.05 });
-    k.add("gloss", GSph(0.115,12,10), fur, { y:0.325, z:0.245 });
-    k.add("gloss", GCyl(0.055,0.075,0.115,9), 0xffffff, { y:0.295, z:0.345, rx:Math.PI/2 });
-    k.add("gloss", GSph(0.10,10,8), furDark, { y:0.365, z:0.235, sx:1.0, sy:0.62, sz:0.7 });
-    k.add("gloss", GSph(0.048,9,7), nose, { y:0.305, z:0.405 });
-    k.add("gloss", GSph(0.019,7,6), 0x14181d, { x:-0.052, y:0.365, z:0.315 });
-    k.add("gloss", GSph(0.019,7,6), 0x14181d, { x:0.052, y:0.365, z:0.315 });
+    var pink = 0xf6a8c6, pinkDark = 0xe186ac, pinkPale = 0xffd6e6, hoof = 0x5a4044, eye = 0x14181d;
+    // plump rounded body
+    k.add("gloss", GSph(0.205,14,11), pink, { y:0.21, sx:0.92, sy:0.86, sz:1.12 });
+    // head
+    k.add("gloss", GSph(0.155,12,10), pink, { y:0.25, z:0.175, sx:0.96, sy:0.92 });
+    // snout disc
+    k.add("gloss", GCyl(0.075,0.075,0.05,12), pinkPale, { y:0.225, z:0.335, rx:Math.PI/2 });
+    k.add("gloss", GSph(0.013,6,5), pinkDark, { x:-0.027, y:0.225, z:0.362 });
+    k.add("gloss", GSph(0.013,6,5), pinkDark, { x:0.027, y:0.225, z:0.362 });
+    // eyes
+    k.add("gloss", GSph(0.018,7,6), eye, { x:-0.058, y:0.30, z:0.275 });
+    k.add("gloss", GSph(0.018,7,6), eye, { x:0.058, y:0.30, z:0.275 });
+    // small forward-perked ears
     [-1,1].forEach(function(sg){
-      k.add("gloss", GCone(0.055,0.15,6), furDark, { x:sg*0.082, y:0.365, z:0.205, rx:2.5, rz:sg*0.30, sz:0.42 });
+      k.add("gloss", GCone(0.065,0.095,4), pink, { x:sg*0.10, y:0.375, z:0.21, rx:0.35, rz:sg*0.3, ry:Math.PI/4, sz:0.55 });
     });
-    // legs
-    [[-0.10,0.16],[0.10,0.16],[-0.10,-0.14],[0.10,-0.14]].forEach(function(p){
-      k.add("gloss", GCyl(0.036,0.042,0.20,8), fur, { x:p[0], y:0.115, z:p[1] });
-      k.add("gloss", GSph(0.045,8,6), furDark, { x:p[0], y:0.028, z:p[1]+0.012, sy:0.6 });
+    // legs (short and stubby)
+    [[-0.095,0.15],[0.095,0.15],[-0.095,-0.13],[0.095,-0.13]].forEach(function(p){
+      k.add("gloss", GCyl(0.036,0.040,0.125,8), pink, { x:p[0], y:0.065, z:p[1] });
+      k.add("gloss", GCyl(0.038,0.032,0.03,8), hoof, { x:p[0], y:0.0, z:p[1] });
     });
-    // curled tail
-    k.add("gloss", GCyl(0.026,0.032,0.16,7), fur, { y:0.33, z:-0.225, rx:-0.9 });
-    k.add("gloss", GCyl(0.020,0.026,0.13,7), fur, { y:0.435, z:-0.275, rx:-0.1 });
-    // collar
-    k.add("metal", GTorus(0.108,0.022,5,14), 0xb0332a, { y:0.275, z:0.155, rx:0.15 });
-    k.add("metal", GCyl(0.026,0.026,0.012,8), 0xf0b93c, { y:0.185, z:0.215, rx:Math.PI/2 });
+    // curly tail
+    k.add("gloss", GCyl(0.013,0.017,0.09,6), pink, { y:0.285, z:-0.195, rx:-0.7, ry:0.4 });
+    k.add("gloss", GCyl(0.010,0.014,0.07,6), pink, { y:0.34, z:-0.235, rx:0.5, ry:-0.4 });
+    // little red bandana
+    k.add("metal", GTorus(0.118,0.02,5,14), 0xb0332a, { y:0.225, z:0.165, rx:0.2 });
     return k;
   }
-  function makeDogMesh(){
-    return prefab("dog", dogKit, { castKeys:["gloss"] });
+  function makePigMesh(){
+    return prefab("pig", pigKit, { castKeys:["gloss"] });
   }
 
   function horseKit(){
@@ -3310,7 +3312,7 @@ import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.m
   }
   var soldierAllies = [];
   var birdAlly = null;
-  var dogAlly = null;
+  var pigAlly = null;
   var horseAlly = null;
   var elCidAlly = null;
   var ALLY_OFFSETS = [
@@ -3332,10 +3334,10 @@ import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.m
       scene.add(bmesh);
       birdAlly = { type:"bird", mesh:bmesh, floatY:0.6 };
     }
-    if(WAR.perks.petDog>0 && !dogAlly){
-      var dmesh = makeDogMesh();
+    if(WAR.perks.petDog>0 && !pigAlly){
+      var dmesh = makePigMesh();
       scene.add(dmesh);
-      dogAlly = { type:"dog", mesh:dmesh, floatY:0 };
+      pigAlly = { type:"pig", mesh:dmesh, floatY:0 };
     }
     if(WAR.perks.petHorse>0 && !horseAlly){
       var hmesh = makeHorseMesh();
@@ -3352,7 +3354,7 @@ import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.m
   function getAllAllies(){
     var list = soldierAllies.slice();
     if(birdAlly) list.push(birdAlly);
-    if(dogAlly) list.push(dogAlly);
+    if(pigAlly) list.push(pigAlly);
     if(horseAlly) list.push(horseAlly);
     if(elCidAlly) list.push(elCidAlly);
     return list;
@@ -3361,7 +3363,7 @@ import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.m
     var i=0;
     soldierAllies.forEach(function(a){ placeAlly(a, ALLY_OFFSETS[i], now); i++; });
     if(birdAlly) placeAlly(birdAlly, ALLY_OFFSETS[3], now);
-    if(dogAlly) placeAlly(dogAlly, ALLY_OFFSETS[4], now);
+    if(pigAlly) placeAlly(pigAlly, ALLY_OFFSETS[4], now);
     if(elCidAlly) placeAlly(elCidAlly, EL_CID_OFFSET, now);
     // horseAlly is NOT placed here when Enrique has the horse perk — he rides it,
     // so its transform is driven directly from pos/rotation in animate() instead.
@@ -4072,7 +4074,7 @@ import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.m
         birdAlly.mesh.rotation.y = ry;
         birdAlly.mesh.rotation.z = Math.sin(t*9.0)*0.22;
       }
-      if(dogAlly) dogAlly.mesh.rotation.y = ry;
+      if(pigAlly) pigAlly.mesh.rotation.y = ry;
       if(elCidAlly) elCidAlly.mesh.rotation.y = ry;
     }
     for(var c=0;c<driftClouds.length;c++){
