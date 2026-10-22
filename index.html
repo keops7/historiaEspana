@@ -899,10 +899,10 @@ import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.m
   }
 
   var GATE_DEFS = {
-    front:{ towerPos:{x:0,z:5}, doorPos:{x:0,z:4}, spawnPos:{x:0,z:-3} },
-    left:{ towerPos:{x:-2.2,z:7.4}, doorPos:{x:-3.6,z:7.4}, spawnPos:{x:-10,z:7.4} },
-    right:{ towerPos:{x:2.2,z:7.4}, doorPos:{x:3.6,z:7.4}, spawnPos:{x:10,z:7.4} },
-    back:{ towerPos:{x:0,z:9}, doorPos:{x:0,z:10}, spawnPos:{x:0,z:17} }
+    front:{ towerPos:{x:0,z:5}, doorPos:{x:0,z:4}, spawnPos:{x:0,z:-7.2} },
+    left:{ towerPos:{x:-2.2,z:7.4}, doorPos:{x:-3.6,z:7.4}, spawnPos:{x:-13.84,z:7.4} },
+    right:{ towerPos:{x:2.2,z:7.4}, doorPos:{x:3.6,z:7.4}, spawnPos:{x:13.84,z:7.4} },
+    back:{ towerPos:{x:0,z:9}, doorPos:{x:0,z:10}, spawnPos:{x:0,z:21.2} }
   };
   var GATE_RANGE = 4.5; // gate towers can now support a neighboring lane, not just their own
   var ENEMY_PATHS = [
@@ -2148,15 +2148,15 @@ import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.m
       { parts: bushKit().parts(),      placements: [] }
     ];
     var rand = mkRand(20240914);
-    var count = 88, placed = 0, attempts = 0;
+    var count = 150, placed = 0, attempts = 0;
     while(placed<count && attempts<count*16){
       attempts++;
       var spread = rand();
-      var radius = 6 + Math.pow(spread, 0.62)*7.4;
+      var radius = 9.6 + Math.pow(spread, 0.62)*11.8;
       var ang = rand()*TAU;
       var tx = Math.cos(ang)*radius;
       var tz = 3 + Math.sin(ang)*radius;
-      if(tx>-5.2 && tx<5.2 && tz>2.4 && tz<11.2) continue;
+      if(tx>-5.5 && tx<5.5 && tz>2.0 && tz<12.5) continue;
       if(distToNearestPath(tx,tz) < 2.3) continue;
       var nearZone = false;
       for(var zi=0; zi<ZONES.length; zi++){
@@ -2168,7 +2168,7 @@ import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.m
       var r = rand();
       var ki = r < 0.5 ? 0 : (r < 0.82 ? 1 : 2);
       var s = (ki===2 ? 0.6 : 0.74) + Math.pow(rand(),0.8)*0.85;
-      var far = Math.min(1, Math.max(0, (radius-9)/5));
+      var far = Math.min(1, Math.max(0, (radius-14.4)/8));
       kinds[ki].placements.push({
         x:tx, z:tz, s:s, sy:s*(0.88+rand()*0.28), ry:rand()*TAU,
         tint: new THREE.Color(TREE_FOLIAGE_COLORS[Math.floor(rand()*TREE_FOLIAGE_COLORS.length)])
@@ -3472,8 +3472,8 @@ import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.m
     }catch(e){ return false; }
   })();
 
-  var GROUND_R = 14.6;
-  var SEA_R = 40.0;
+  var GROUND_R = 23.0;
+  var SEA_R = 63.0;
   var SEA_OFF_X = 14.2, SEA_OFF_Z = 9.45;   // pushed toward the camera so only the far horizon is in frame
   var skyQuad = null, sunLight = null;
   var SUN_DIR = new THREE.Vector3(0.52, 0.74, 0.42).normalize();
@@ -3930,7 +3930,7 @@ import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.m
 
     scene = new THREE.Scene();
     scene.background = null;
-    scene.fog = new THREE.Fog(0xdaeaf0, 72, 190);
+    scene.fog = new THREE.Fog(0xdaeaf0, 110, 300);
 
     var f0 = computeFrustum(w,h);
     camera = new THREE.OrthographicCamera(-f0.halfW,f0.halfW,f0.halfH,-f0.halfH,0.1,300);
@@ -4319,8 +4319,8 @@ import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.m
       var ix = mx/mag, iz = mz/mag;
       var nx = ix*moveRight.x + (-iz)*moveFwd.x;
       var nz = ix*moveRight.z + (-iz)*moveFwd.z;
-      pos.x = Math.max(-11,Math.min(11,pos.x+nx*3.4*speedScale*speedMult*dt));
-      pos.z = Math.max(-4,Math.min(9.5,pos.z+nz*3.4*speedScale*speedMult*dt));
+      pos.x = Math.max(-16,Math.min(16,pos.x+nx*3.4*speedScale*speedMult*dt));
+      pos.z = Math.max(-12,Math.min(17,pos.z+nz*3.4*speedScale*speedMult*dt));
       player.rotation.y = Math.atan2(nx,nz);
       if(!mounted){
         var swing = Math.sin(now*0.012)*0.5;
